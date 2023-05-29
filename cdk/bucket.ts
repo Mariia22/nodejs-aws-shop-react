@@ -17,6 +17,7 @@ export class StaticSite extends Construct {
     const bucket = new s3.Bucket(this, "ShopCosmeticsBucket", {
       bucketName: "shop-cosmetics-bucket",
       websiteIndexDocument: "index.html",
+      websiteErrorDocument: "index.html",
       publicReadAccess: false,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL
     });

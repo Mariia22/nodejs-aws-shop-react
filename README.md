@@ -36,3 +36,7 @@ Runs tests in console, in browser or with coverage.
 ### `lint`, `prettier`
 
 Runs linting and formatting for all files in `src` folder.
+
+# Deployment information
+S3 bucket - https://shop-cosmetics-bucket.s3.eu-west-1.amazonaws.com/
+CloudFront - https://d3mgbk8yf35djy.cloudfront.net/ 
