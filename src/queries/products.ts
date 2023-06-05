@@ -9,7 +9,7 @@ export function useAvailableProducts() {
     "available-products",
     async () => {
       const res = await axios.get<AvailableProduct[]>(
-        `${API_PATHS.bff}/product/available`
+        `${API_PATHS.bff}/products`
       );
       return res.data;
     }
@@ -50,8 +50,8 @@ export function useUpsertAvailableProduct() {
   return useMutation((values: AvailableProduct) =>
     axios.put<AvailableProduct>(`${API_PATHS.bff}/product`, values, {
       headers: {
-        Authorization: `Basic ${localStorage.getItem("authorization_token")}`,
-      },
+        Authorization: `Basic ${localStorage.getItem("authorization_token")}`
+      }
     })
   );
 }
@@ -60,8 +60,8 @@ export function useDeleteAvailableProduct() {
   return useMutation((id: string) =>
     axios.delete(`${API_PATHS.bff}/product/${id}`, {
       headers: {
-        Authorization: `Basic ${localStorage.getItem("authorization_token")}`,
-      },
+        Authorization: `Basic ${localStorage.getItem("authorization_token")}`
+      }
     })
   );
 }
