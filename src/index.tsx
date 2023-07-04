@@ -7,6 +7,7 @@ import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 import { theme } from "~/theme";
+import axios from 'axios';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -18,6 +19,20 @@ if (import.meta.env.DEV) {
   const { worker } = await import("./mocks/browser");
   worker.start({ onUnhandledRequest: "bypass" });
 }
+
+axios.interceptors.response.use(
+  response => {
+    return response
+  },
+  error => {
+    const statusResponse = error.response.status;
+    if (statusResponse === 400 || statusResponse === 401 || statusResponse === 403) {
+      alert(`Error ${statusResponse}: ${error.response.data?.message}`);
+    }
+
+    return Promise.reject(error.response)
+  }
+);
 
 const container = document.getElementById("app");
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
