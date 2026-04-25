@@ -7,6 +7,7 @@ import * as path from "path";
 import * as fs from "fs";
 import { Distribution, ViewerProtocolPolicy } from "aws-cdk-lib/aws-cloudfront";
 import { S3BucketOrigin } from "aws-cdk-lib/aws-cloudfront-origins";
+import * as iam from "aws-cdk-lib/aws-iam";
 
 export type StaticSiteStackProps = cdk.StackProps;
 
@@ -15,10 +16,18 @@ export class StaticSiteStack extends cdk.Stack {
     super(scope, id, props);
 
     const websiteBucket = new Bucket(this, "WebsiteBucket", {
-      blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+      blockPublicAccess: BlockPublicAccess.BLOCK_ACLS_ONLY,
       removalPolicy: RemovalPolicy.RETAIN,
       autoDeleteObjects: false,
     });
+
+    websiteBucket.addToResourcePolicy(
+      new iam.PolicyStatement({
+        actions: ["s3:GetObject"],
+        resources: [websiteBucket.arnForObjects("*")],
+        principals: [new iam.AnyPrincipal()],
+      })
+    );
 
     const distribution = new Distribution(this, "WebsiteDistribution", {
       defaultBehavior: {
@@ -28,6 +37,12 @@ export class StaticSiteStack extends cdk.Stack {
       defaultRootObject: "index.html",
       errorResponses: [
         {
+          httpStatus: 403,
+          responseHttpStatus: 200,
+          responsePagePath: "/index.html",
+          ttl: Duration.minutes(0),
+        },
+        {
           httpStatus: 404,
           responseHttpStatus: 200,
           responsePagePath: "/index.html",
@@ -36,22 +51,6 @@ export class StaticSiteStack extends cdk.Stack {
       ],
     });
 
-    websiteBucket.addToResourcePolicy(
-      new cdk.aws_iam.PolicyStatement({
-        actions: ["s3:GetObject"],
-        principals: [
-          new cdk.aws_iam.ServicePrincipal("cloudfront.amazonaws.com"),
-        ],
-        resources: [websiteBucket.arnForObjects("*")],
-        conditions: {
-          StringEquals: {
-            "AWS:SourceArn": `arn:aws:cloudfront::${
-              cdk.Stack.of(this).account
-            }:distribution/${distribution.distributionId}`,
-          },
-        },
-      })
-    );
     const projectRoot = path.resolve(__dirname, "..", "..");
     const distPath = path.join(projectRoot, "dist");
 
