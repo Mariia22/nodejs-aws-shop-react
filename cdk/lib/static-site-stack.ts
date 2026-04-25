@@ -4,6 +4,7 @@ import { Bucket, BlockPublicAccess } from "aws-cdk-lib/aws-s3";
 import { BucketDeployment, Source } from "aws-cdk-lib/aws-s3-deployment";
 import { RemovalPolicy, Duration } from "aws-cdk-lib";
 import * as path from "path";
+import * as fs from "fs";
 import { Distribution, ViewerProtocolPolicy } from "aws-cdk-lib/aws-cloudfront";
 import { S3BucketOrigin } from "aws-cdk-lib/aws-cloudfront-origins";
 
@@ -51,10 +52,17 @@ export class StaticSiteStack extends cdk.Stack {
         },
       })
     );
+    const projectRoot = path.resolve(__dirname, "..", "..");
+    const distPath = path.join(projectRoot, "dist");
 
-    const distPath = path.join(__dirname, "..", "..", "dist");
+    if (!fs.existsSync(distPath) || fs.readdirSync(distPath).length === 0) {
+      throw new Error(
+        `Build output directory is empty or does not exist: ${distPath}`
+      );
+    }
+
     new BucketDeployment(this, "DeploySite", {
-      sources: [Source.asset(distPath)],
+      sources: [Source.asset(distPath, { exclude: [] })],
       destinationBucket: websiteBucket,
       distribution,
       distributionPaths: ["/*"],

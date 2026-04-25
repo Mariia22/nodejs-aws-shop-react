@@ -14,8 +14,6 @@
     "cdk:synth": "npx cdk synth --app \"npx ts-node --transpile-only cdk/infra.ts\"",
     "cdk:bootstrap": "npx cdk bootstrap --app \"npx ts-node --transpile-only cdk/infra.ts\"",
     "cdk:deploy": "npm run build && npx cdk deploy --app \"npx ts-node --transpile-only cdk/infra.ts\" --require-approval never"
-    ,
-    "site:publish": "npm run build && npx cdk deploy --app \"npx ts-node --transpile-only cdk/infra.ts\" --require-approval never"
   },
   "dependencies": {
     "@emotion/react": "^11.9.3",
