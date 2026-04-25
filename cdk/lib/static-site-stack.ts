@@ -4,11 +4,8 @@ import { Bucket, BlockPublicAccess } from "aws-cdk-lib/aws-s3";
 import { BucketDeployment, Source } from "aws-cdk-lib/aws-s3-deployment";
 import { RemovalPolicy, Duration } from "aws-cdk-lib";
 import * as path from "path";
-import {
-  Distribution,
-  CfnOriginAccessControl,
-  ViewerProtocolPolicy,
-} from "aws-cdk-lib/aws-cloudfront";
+import { Distribution, ViewerProtocolPolicy } from "aws-cdk-lib/aws-cloudfront";
+import { S3BucketOrigin } from "aws-cdk-lib/aws-cloudfront-origins";
 
 export type StaticSiteStackProps = cdk.StackProps;
 
@@ -18,28 +15,13 @@ export class StaticSiteStack extends cdk.Stack {
 
     const websiteBucket = new Bucket(this, "WebsiteBucket", {
       blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
-      removalPolicy: RemovalPolicy.DESTROY,
-      autoDeleteObjects: true,
-    });
-
-    const originAccessControl = new CfnOriginAccessControl(this, "WebsiteOAC", {
-      originAccessControlConfig: {
-        name: "WebsiteOAC",
-        originAccessControlOriginType: "s3",
-        signingBehavior: "always",
-        signingProtocol: "sigv4",
-      },
+      removalPolicy: RemovalPolicy.RETAIN,
+      autoDeleteObjects: false,
     });
 
     const distribution = new Distribution(this, "WebsiteDistribution", {
       defaultBehavior: {
-        origin: {
-          domainName: websiteBucket.bucketRegionalDomainName,
-          originAccessControl: originAccessControl,
-          originPath: "",
-          originId: "S3Origin",
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any,
+        origin: S3BucketOrigin.withBucketDefaults(websiteBucket),
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
       },
       defaultRootObject: "index.html",
