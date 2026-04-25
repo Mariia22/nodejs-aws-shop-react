@@ -1,0 +1,6 @@
+{
+  "app": "npx ts-node --transpile-only cdk/infra.ts",
+  "context": {
+    "@aws-cdk/core:newStyleStackSynthesis": true
+  }
+}
