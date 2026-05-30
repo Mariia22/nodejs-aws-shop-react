@@ -23,24 +23,45 @@ export default function CSVFileImport({ url, title }: CSVFileImportProps) {
   };
 
   const uploadFile = async () => {
+    if (!file) return;
+
     console.log("uploadFile to", url);
 
-    // Get the presigned URL
-    // const response = await axios({
-    //   method: "GET",
-    //   url,
-    //   params: {
-    //     name: encodeURIComponent(file.name),
-    //   },
-    // });
-    // console.log("File to upload: ", file.name);
-    // console.log("Uploading to: ", response.data);
-    // const result = await fetch(response.data, {
-    //   method: "PUT",
-    //   body: file,
-    // });
-    // console.log("Result: ", result);
-    // setFile("");
+    try {
+      // Get authorization token from localStorage
+      const authorizationToken = localStorage.getItem("authorization_token");
+
+      if (!authorizationToken) {
+        console.error("Authorization token not found in localStorage");
+        alert("Authorization token not found. Please log in first.");
+        return;
+      }
+
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append("file", file);
+
+      // Make request with Basic Authorization header
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          Authorization: `Basic ${authorizationToken}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Upload failed with status ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("Upload successful:", result);
+      alert("File uploaded successfully!");
+      setFile(undefined);
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      alert(`Error uploading file: ${error instanceof Error ? error.message : "Unknown error"}`);
+    }
   };
   return (
     <Box>
